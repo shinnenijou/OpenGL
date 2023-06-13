@@ -2,6 +2,8 @@
 cmake_minimum_required (VERSION 3.0)
 
 project (MyOpenGL C CXX)
+SET(OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build)
+SET(EXECUTABLE_OUTPUT_PATH ${OUTPUT_PATH}/bin)
 
 aux_source_directory (src DIR_SRCS)
 
