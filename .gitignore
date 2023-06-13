@@ -400,3 +400,4 @@ FodyWeavers.xsd
 build
 .DS_Store
 .vscode
+CMakeSettings.json
