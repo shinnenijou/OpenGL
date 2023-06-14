@@ -7,6 +7,7 @@ SET(EXECUTABLE_OUTPUT_PATH ${OUTPUT_PATH}/bin)
 
 aux_source_directory (src DIR_SRCS)
 
+include_directories(include)
 include_directories (Dependencies/glew-2.2.0/include)
 include_directories (Dependencies/glfw-3.3.8/include)
 
