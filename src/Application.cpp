@@ -4,11 +4,17 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
+#include <cmath>
+#include <chrono>
 
 #include "fileSystem.h"
 #include "shader.h"
 #include "math.hpp"
 
+# define M_PI           3.14159265358979323846
+
+constexpr int FRAMERATE = 60;
+constexpr int UPDATE_INTERVAL = (int)(1000 / FRAMERATE);
 
 int main(void)
 {
@@ -27,7 +33,7 @@ int main(void)
     #endif
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(640, 640, "Hello World", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -75,9 +81,32 @@ int main(void)
     unsigned int shader = createShader(shaderSource.VertexSource, shaderSource.FragmentSource);
     glUseProgram(shader);
 
+    auto timer = std::chrono::steady_clock::now();
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
+
+        auto now = std::chrono::steady_clock::now();
+        if ((std::chrono::duration_cast<std::chrono::milliseconds>(now - timer).count() > UPDATE_INTERVAL))
+        {
+            timer = now;
+
+            for (int i = 0; i < 4; ++i)
+            {
+                Matrix<float> vec2 = rotateVector2(
+                    Matrix<float>(1, 2, { positions[2 * i], positions[2 * i + 1] }),
+                    Matrix<float>(1, 2, { 0, 0 }),
+                    M_PI / 180
+                );
+
+                positions[2 * i] = vec2[0][0];
+                positions[2 * i + 1] = vec2[0][1];
+            }
+
+            glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
+        }
+
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
