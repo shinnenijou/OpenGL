@@ -5,47 +5,9 @@
 #include <string>
 
 #include "fileSystem.h"
-
-static unsigned int compileShader(unsigned int type, const std::string &source)
-{
-    unsigned int id = glCreateShader(type);
-    const char *src = source.c_str();
-    glShaderSource(id, 1, &src, nullptr);
-    glCompileShader(id);
-
-    int result;
-    glGetShaderiv(id, GL_COMPILE_STATUS, &result);
-    if (result == GL_FALSE)
-    {
-        int length;
-        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-        char *message = (char*)alloca(length * sizeof(char));
-        glGetShaderInfoLog(id, length, &length, message);
-        std::cout << message << std::endl;
-        glDeleteShader(id);
-        return 0;
-    }
-
-    return id;
-}
+#include "shader.h"
 
 
-static int createShader(const std::string &vertexShader, const std::string &fragmentShader)
-{
-    unsigned int program = glCreateProgram();
-    unsigned int vs = compileShader(GL_VERTEX_SHADER, vertexShader);
-    unsigned int fs = compileShader(GL_FRAGMENT_SHADER, fragmentShader);
-
-    glAttachShader(program, vs);
-    glAttachShader(program, fs);
-    glLinkProgram(program);
-    glValidateProgram(program);
-
-    glDeleteShader(vs);
-    glDeleteShader(fs);
-
-    return program;
-}
 
 int main(void)
 {
@@ -96,9 +58,8 @@ int main(void)
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
 
-    std::string vertexShader = read_text("shader/vertex.vert");
-    std::string fragmentShader = read_text("shader/fragment.frag");
-    unsigned int shader = createShader(vertexShader, fragmentShader);
+    ShaderProgramSource shaderSource = parseShader(read_text("res/shaders/basic.shader"));
+    unsigned int shader = createShader(shaderSource.VertexSource, shaderSource.FragmentSource);
     glUseProgram(shader);
 
     /* Loop until the user closes the window */

@@ -5,17 +5,17 @@ project (MyOpenGL C CXX)
 SET(OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build)
 SET(EXECUTABLE_OUTPUT_PATH ${OUTPUT_PATH}/bin)
 
-aux_source_directory (src DIR_SRCS)
-
-include_directories(include)
-include_directories (Dependencies/glew-2.2.0/include)
-include_directories (Dependencies/glfw-3.3.8/include)
 
 add_subdirectory (Dependencies/glew-2.2.0/build/cmake)
 add_subdirectory (Dependencies/glfw-3.3.8)
 
-# 生成目标(可执行文件)
+# main target
+aux_source_directory (src DIR_SRCS)
 add_executable (myOpenGL ${DIR_SRCS})
+
+target_include_directories (myOpenGL PRIVATE include)
+target_include_directories (myOpenGL PRIVATE Dependencies/glew-2.2.0/include)
+target_include_directories (myOpenGL PRIVATE Dependencies/glfw-3.3.8/include)
 
 # 链接静态库
 target_link_libraries(myOpenGL glew_s)

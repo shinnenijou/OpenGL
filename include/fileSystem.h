@@ -7,4 +7,4 @@
 
 const std::string read_text(const std::string &filename);
 
-#endif
+#endif // !FILE_SYSTEM_H
