@@ -14,7 +14,7 @@ public:
 	Matrix(size_t n, size_t m) : m_elements(n, std::vector<T>(m)) {}
 	Matrix(size_t n, size_t m, const std::vector<T>& elements);
 	Matrix(const Matrix<T>& rhs);
-	Matrix<T>& operator=(Matrix<T> &rhs);
+	Matrix<T>& operator=(const Matrix<T> &rhs);
 	~Matrix() = default;
 
 	size_t row_size() const { return m_elements.size(); }
@@ -71,7 +71,7 @@ Matrix<T>::Matrix(const Matrix<T>& rhs)
 }
 
 template<class T>
-Matrix<T>& Matrix<T>::operator=(Matrix<T> &rhs)
+Matrix<T>& Matrix<T>::operator=(const Matrix<T> &rhs)
 {
 	if (*this == rhs)
 	{

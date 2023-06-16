@@ -11,8 +11,6 @@
 #include "shader.h"
 #include "math.hpp"
 
-# define M_PI           3.14159265358979323846
-
 constexpr int FRAMERATE = 60;
 constexpr int UPDATE_INTERVAL = (int)(1000 / FRAMERATE);
 
