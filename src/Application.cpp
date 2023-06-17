@@ -10,6 +10,7 @@
 #include "fileSystem.h"
 #include "shader.h"
 #include "math.hpp"
+#include "wrapper.h"
 
 constexpr int FRAMERATE = 60;
 constexpr int UPDATE_INTERVAL = (int)(1000 / FRAMERATE);
@@ -44,6 +45,8 @@ int main(void)
     if (glewInit() != GLEW_OK) {
         std::cout << "ERROR" << std::endl;
     }
+
+    std::cout << glGetString(GL_VERSION) << std::endl;
 
     float positions[] = {
         -0.5f, -0.5f,   // 0
@@ -80,11 +83,11 @@ int main(void)
     glUseProgram(shader);
 
     auto timer = std::chrono::steady_clock::now();
+    Matrix<float> pivot(1, 2, { 0.5f, 0 });
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
-
         auto now = std::chrono::steady_clock::now();
         if ((std::chrono::duration_cast<std::chrono::milliseconds>(now - timer).count() > UPDATE_INTERVAL))
         {
@@ -104,12 +107,11 @@ int main(void)
 
             glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
         }
-
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
         //glDrawArrays(GL_TRIANGLES, 0, 3);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
          
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
