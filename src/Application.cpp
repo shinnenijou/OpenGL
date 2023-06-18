@@ -4,7 +4,6 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
-#include <cmath>
 #include <chrono>
 
 #include "fileSystem.h"
@@ -14,6 +13,8 @@
 
 constexpr int FRAMERATE = 60;
 constexpr int UPDATE_INTERVAL = (int)(1000 / FRAMERATE);
+
+#define PI 3.14159265358979323846
 
 int main(void)
 {
@@ -98,7 +99,7 @@ int main(void)
                 Matrix<float> vec2 = rotateVector2(
                     Matrix<float>(1, 2, { positions[2 * i], positions[2 * i + 1] }),
                     Matrix<float>(1, 2, { 0, 0 }),
-                    M_PI / 180
+                    PI / 180
                 );
 
                 positions[2 * i] = vec2[0][0];
