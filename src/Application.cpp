@@ -11,9 +11,6 @@
 #include "math.hpp"
 #include "wrapper.h"
 
-constexpr int FRAMERATE = 60;
-constexpr int UPDATE_INTERVAL = (int)(1000 / FRAMERATE);
-
 #define PI 3.14159265358979323846
 
 int main(void)
@@ -42,6 +39,7 @@ int main(void)
 
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
+    glfwSwapInterval(1);
 
     if (glewInit() != GLEW_OK) {
         std::cout << "ERROR" << std::endl;
@@ -62,54 +60,71 @@ int main(void)
     };
 
     unsigned int vertexBuffer, vertexArray;
-    glGenBuffers(1, &vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
+    GLCall(glGenBuffers(1, &vertexBuffer));
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer));
+    GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW));
 
     /* Why do we need vertex array in macOS? */
-    glGenVertexArrays(1, &vertexArray);
-    glBindVertexArray(vertexArray);
+    GLCall(glGenVertexArrays(1, &vertexArray));
+    GLCall(glBindVertexArray(vertexArray));
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+    GLCall(glEnableVertexAttribArray(0));
+    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
 
     // index buffer
     unsigned int ibo;
-    glGenBuffers(1, &ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    GLCall(glGenBuffers(1, &ibo));
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW));
 
     ShaderProgramSource shaderSource = parseShader(read_text("res/shaders/basic.shader"));
     unsigned int shader = createShader(shaderSource.VertexSource, shaderSource.FragmentSource);
-    glUseProgram(shader);
+    GLCall(glUseProgram(shader));
 
-    auto timer = std::chrono::steady_clock::now();
+    GLCall(int color_loc = glGetUniformLocation(shader, "u_Color"));
+    ASSERT(color_loc != -1);
+    GLCall(glUniform4f(color_loc, 1.0f, 0.0f, 0.0f, 1.0f));
+    
+    /* initial position */
     Matrix<float> pivot(1, 2, { 0.5f, 0 });
+
+    /* initial color */
+    float r = 0.8f;
+    float increment = 0.05f;
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
-        auto now = std::chrono::steady_clock::now();
-        if ((std::chrono::duration_cast<std::chrono::milliseconds>(now - timer).count() > UPDATE_INTERVAL))
-        {
-            timer = now;
-
-            for (int i = 0; i < 4; ++i)
-            {
-                Matrix<float> vec2 = rotateVector2(
-                    Matrix<float>(1, 2, { positions[2 * i], positions[2 * i + 1] }),
-                    Matrix<float>(1, 2, { 0, 0 }),
-                    PI / 180
-                );
-
-                positions[2 * i] = vec2[0][0];
-                positions[2 * i + 1] = vec2[0][1];
-            }
-
-            glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
-        }
         /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
+        GLCall(glClear(GL_COLOR_BUFFER_BIT));
+        
+        /* transit position */
+        for (int i = 0; i < 4; ++i)
+        {
+            Matrix<float> vec2 = rotateVector2(
+                Matrix<float>(1, 2, { positions[2 * i], positions[2 * i + 1] }),
+                Matrix<float>(1, 2, { 0, 0 }),
+                PI / 180
+            );
+
+            positions[2 * i] = vec2[0][0];
+            positions[2 * i + 1] = vec2[0][1];
+        }
+
+        GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW));
+
+        /* transit color */
+        if (r > 1.0f)
+        {
+            increment = - 0.05f;
+        }
+        else if (r < 0.0f)
+        {
+            increment = 0.05f;
+        }
+        r += increment;
+
+        GLCall(glUniform4f(color_loc, r, 0.2f, 0.3f, 1.0f));
 
         //glDrawArrays(GL_TRIANGLES, 0, 3);
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
