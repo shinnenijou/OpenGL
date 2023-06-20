@@ -13,6 +13,7 @@
 #include <vertexBuffer.h>
 #include <indexBuffer.h>
 #include <renderer.h>
+#include <vertexArray.h>
 
 #define PI 3.14159265358979323846
 
@@ -68,12 +69,10 @@ int main(void)
         /* VertexArray is generated with default index 0 in compatibility profile but isn't in core profile
          * thus we must generate vertex array manually here
          */
-        unsigned int vertexArray;
-        GLCall(glGenVertexArrays(1, &vertexArray));
-        GLCall(glBindVertexArray(vertexArray));
-
-        GLCall(glEnableVertexAttribArray(0));
-        GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
+        VertexArray va;
+        VertexBufferLayout layout;
+        layout.push<float>(2);
+        va.addBuffer(vb, layout);
 
         ShaderProgramSource shaderSource = parseShader(read_text("res/shaders/basic.shader"));
         unsigned int shader = createShader(shaderSource.VertexSource, shaderSource.FragmentSource);
@@ -91,10 +90,7 @@ int main(void)
         float increment = 0.05f;
 
         /* Unbind test */
-        GLCall(glBindVertexArray(0));
         GLCall(glUseProgram(0));
-        GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
-        GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
@@ -117,8 +113,7 @@ int main(void)
             GLCall(glUseProgram(shader));
             GLCall(glUniform4f(color_loc, r, 0.3f, 0.8f, 1.0f));
 
-            GLCall(glBindVertexArray(vertexArray));
-
+            va.bind();
             ib.bind();
 
             //glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -131,7 +126,6 @@ int main(void)
             glfwPollEvents();
         }
 
-        glDeleteVertexArrays(1, &vertexArray);
         glDeleteProgram(shader);
     }
     glfwTerminate();
