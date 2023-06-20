@@ -4,7 +4,7 @@
 #if defined(__APPLE__)
     #define ASSERT(x) if(!(x)) __builtin_debugtrap();
 #elif defined(_MSC_VER) 
-    #define ASSERT(x) if(!x) __debugbreak();
+    #define ASSERT(x) if(!(x)) __debugbreak();
 #endif
 
 #if defined(NDEBUG)
