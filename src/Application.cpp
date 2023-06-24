@@ -7,13 +7,13 @@
 #include <chrono>
 #include <vector>
 
-#include "fileSystem.h"
-#include "shader.h"
+#include "renderer.h"
 #include "math.hpp"
-#include <vertexBuffer.h>
-#include <indexBuffer.h>
-#include <renderer.h>
-#include <vertexArray.h>
+
+#include "vertexBuffer.h"
+#include "indexBuffer.h"
+#include "vertexArray.h"
+#include "shader.h"
 
 #define PI 3.14159265358979323846
 
@@ -74,13 +74,10 @@ int main(void)
         layout.push<float>(2);
         va.addBuffer(vb, layout);
 
-        ShaderProgramSource shaderSource = parseShader(read_text("res/shaders/basic.shader"));
-        unsigned int shader = createShader(shaderSource.VertexSource, shaderSource.FragmentSource);
-        GLCall(glUseProgram(shader));
+        Shader shader("res/shaders/basic.shader");
+        shader.bind();
 
-        GLCall(int color_loc = glGetUniformLocation(shader, "u_Color"));
-        ASSERT(color_loc != -1);
-        GLCall(glUniform4f(color_loc, 1.0f, 0.0f, 0.0f, 1.0f));
+        shader.setUniform4f("u_Color", 1.0f, 0.0f, 0.0f, 1.0f);
 
         /* initial position */
         Matrix<float> pivot(1, 2, { 0.5f, 0 });
@@ -88,9 +85,6 @@ int main(void)
         /* initial color */
         float r = 0.8f;
         float increment = 0.05f;
-
-        /* Unbind test */
-        GLCall(glUseProgram(0));
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
@@ -110,8 +104,7 @@ int main(void)
             GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
             /* Bind buffer */
-            GLCall(glUseProgram(shader));
-            GLCall(glUniform4f(color_loc, r, 0.3f, 0.8f, 1.0f));
+            shader.setUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
 
             va.bind();
             ib.bind();
@@ -125,9 +118,8 @@ int main(void)
             /* Poll for and process events */
             glfwPollEvents();
         }
-
-        glDeleteProgram(shader);
     }
+
     glfwTerminate();
     return 0;
 }
