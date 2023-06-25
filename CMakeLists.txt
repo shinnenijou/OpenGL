@@ -16,6 +16,7 @@ aux_source_directory (src DIR_SRCS)
 add_executable (myOpenGL ${DIR_SRCS})
 
 target_include_directories (myOpenGL PRIVATE include)
+target_include_directories (myOpenGL PRIVATE include/vendor)
 target_include_directories (myOpenGL PRIVATE Dependencies/glew-2.2.0/include)
 target_include_directories (myOpenGL PRIVATE Dependencies/glfw-3.3.8/include)
 

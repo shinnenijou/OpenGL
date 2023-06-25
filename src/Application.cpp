@@ -15,6 +15,7 @@
 #include "indexBuffer.h"
 #include "vertexArray.h"
 #include "shader.h"
+#include "texture.h"
 
 #define PI 3.14159265358979323846
 
@@ -53,10 +54,10 @@ int main(void)
     std::cout << glGetString(GL_VERSION) << std::endl;
     {
         std::vector<float> positions = {
-            -0.5f, -0.5f,   // 0
-             0.5f, -0.5f,   // 1
-             0.5f,  0.5f,   // 2
-            -0.5f,  0.5f,   // 3
+            -0.5f, -0.5f, 0.0f, 0.0f,  // 0
+             0.5f, -0.5f, 1.0f, 0.0f,  // 1
+             0.5f,  0.5f, 1.0f, 1.0f,  // 2
+            -0.5f,  0.5f, 0.0f, 1.0f,  // 3
         };
 
         std::vector<unsigned int> indices = {
@@ -64,7 +65,10 @@ int main(void)
             2, 3, 0,
         };
 
-        VertexBuffer vb(&positions[0], positions.size() * sizeof(positions[0]));
+        GLCall(glEnable(GL_BLEND));
+        GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
+        VertexBuffer vb(&positions[0], positions.size() * sizeof(decltype(positions)::value_type));
         IndexBuffer ib(&indices[0], indices.size());
 
         /* VertexArray is generated with default index 0 in compatibility profile but isn't in core profile
@@ -73,12 +77,16 @@ int main(void)
         VertexArray va;
         VertexBufferLayout layout;
         layout.push<float>(2);
+        layout.push<float>(2);
         va.addBuffer(vb, layout);
 
         Shader shader("res/shaders/basic.shader");
         shader.bind();
-
         shader.setUniform4f("u_Color", 1.0f, 0.0f, 0.0f, 1.0f);
+
+        Texture texture("res/textures/logo.png");
+        texture.bind();
+        shader.setUniform1i("u_Texture", 0);
 
         Renderer renderer;
 
