@@ -11,6 +11,7 @@
 #include "math.hpp"
 
 #include "vertexBuffer.h"
+#include "vertexBufferLayout.h"
 #include "indexBuffer.h"
 #include "vertexArray.h"
 #include "shader.h"
@@ -79,6 +80,8 @@ int main(void)
 
         shader.setUniform4f("u_Color", 1.0f, 0.0f, 0.0f, 1.0f);
 
+        Renderer renderer;
+
         /* initial position */
         Matrix<float> pivot(1, 2, { 0.5f, 0 });
 
@@ -100,17 +103,12 @@ int main(void)
             }
             r += increment;
 
-            /* Render here */
-            GLCall(glClear(GL_COLOR_BUFFER_BIT));
-
-            /* Bind buffer */
+            shader.bind();
             shader.setUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
 
-            va.bind();
-            ib.bind();
-
-            //glDrawArrays(GL_TRIANGLES, 0, 3);
-            GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+            /* Render here */
+            renderer.clear();
+            renderer.draw(va, ib, shader);
 
             /* Swap front and back buffers */
             glfwSwapBuffers(window);

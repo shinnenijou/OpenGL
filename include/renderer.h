@@ -3,6 +3,10 @@
 
 #include <GL/glew.h>
 
+#include "vertexArray.h"
+#include "indexBuffer.h"
+#include "shader.h"
+
 #if defined(__APPLE__)
 #define ASSERT(x) if(!(x)) __builtin_debugtrap();
 #elif defined(_MSC_VER) 
@@ -19,5 +23,13 @@
 
 void GLClearError();
 bool GLLogCall(const char* function, const char* file, int line);
+
+class Renderer
+{
+public:
+    void clear() const;
+    void draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
+
+};
 
 #endif // !RENDERER_H
