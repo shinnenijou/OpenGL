@@ -1,5 +1,3 @@
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
 
 #include <iostream>
 #include <string>
@@ -7,9 +5,13 @@
 #include <chrono>
 #include <vector>
 
-#include "renderer.h"
-#include "math.hpp"
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include "renderer.h"
 #include "vertexBuffer.h"
 #include "vertexBufferLayout.h"
 #include "indexBuffer.h"
@@ -36,7 +38,7 @@ int main(void)
     #endif
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 640, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -71,6 +73,8 @@ int main(void)
         VertexBuffer vb(&positions[0], positions.size() * sizeof(decltype(positions)::value_type));
         IndexBuffer ib(&indices[0], indices.size());
 
+        glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+
         /* VertexArray is generated with default index 0 in compatibility profile but isn't in core profile
          * thus we must generate vertex array manually here
          */
@@ -82,37 +86,18 @@ int main(void)
 
         Shader shader("res/shaders/basic.shader");
         shader.bind();
-        shader.setUniform4f("u_Color", 1.0f, 0.0f, 0.0f, 1.0f);
 
         Texture texture("res/textures/logo.png");
-        texture.bind();
         shader.setUniform1i("u_Texture", 0);
+        shader.setUniformMat4f("u_MVP", proj);
 
         Renderer renderer;
-
-        /* initial position */
-        Matrix<float> pivot(1, 2, { 0.5f, 0 });
-
-        /* initial color */
-        float r = 0.8f;
-        float increment = 0.05f;
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
         {
-            /* transit color */
-            if (r > 1.0f)
-            {
-                increment = -0.05f;
-            }
-            else if (r < 0.0f)
-            {
-                increment = 0.05f;
-            }
-            r += increment;
-
             shader.bind();
-            shader.setUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
+            texture.bind();
 
             /* Render here */
             renderer.clear();
