@@ -13,10 +13,13 @@ add_subdirectory (Dependencies/glfw-3.3.8)
 
 # main target
 aux_source_directory (src DIR_SRCS)
-add_executable (myOpenGL ${DIR_SRCS})
+aux_source_directory (src/vendor/stb_image STB_IMAGE_SRCS)
+aux_source_directory (src/vendor/imgui IMGUI_SRCS)
 
-target_include_directories (myOpenGL PRIVATE include)
-target_include_directories (myOpenGL PRIVATE include/vendor)
+add_executable (myOpenGL ${DIR_SRCS} ${STB_IMAGE_SRCS} ${IMGUI_SRCS})
+
+target_include_directories (myOpenGL PRIVATE src)
+target_include_directories (myOpenGL PRIVATE src/vendor)
 target_include_directories (myOpenGL PRIVATE Dependencies/glew-2.2.0/include)
 target_include_directories (myOpenGL PRIVATE Dependencies/glfw-3.3.8/include)
 
