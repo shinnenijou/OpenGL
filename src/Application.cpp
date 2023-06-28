@@ -56,10 +56,10 @@ int main(void)
     std::cout << glGetString(GL_VERSION) << std::endl;
     {
         std::vector<float> positions = {
-            -0.5f, -0.5f, 0.0f, 0.0f,  // 0
-             0.5f, -0.5f, 1.0f, 0.0f,  // 1
-             0.5f,  0.5f, 1.0f, 1.0f,  // 2
-            -0.5f,  0.5f, 0.0f, 1.0f,  // 3
+            100.0f, 100.0f, 0.0f, 0.0f,  // 0
+            200.0f, 100.0f, 1.0f, 0.0f,  // 1
+            200.0f, 200.0f, 1.0f, 1.0f,  // 2
+            100.0f, 200.0f, 0.0f, 1.0f,  // 3
         };
 
         std::vector<unsigned int> indices = {
@@ -73,7 +73,12 @@ int main(void)
         VertexBuffer vb(&positions[0], positions.size() * sizeof(decltype(positions)::value_type));
         IndexBuffer ib(&indices[0], indices.size());
 
-        glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+        glm::mat4 proj = glm::ortho(0.0f, 640.0f, 0.0f, 480.0f, -1.0f, 1.0f);
+        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(300, 0, 0));
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(-200, 200, 0));
+
+
+        glm::mat4 mvp =  proj * view * model;
 
         /* VertexArray is generated with default index 0 in compatibility profile but isn't in core profile
          * thus we must generate vertex array manually here
@@ -89,7 +94,7 @@ int main(void)
 
         Texture texture("res/textures/logo.png");
         shader.setUniform1i("u_Texture", 0);
-        shader.setUniformMat4f("u_MVP", proj);
+        shader.setUniformMat4f("u_MVP", mvp);
 
         Renderer renderer;
 
