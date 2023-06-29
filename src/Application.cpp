@@ -11,6 +11,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
+
 #include "renderer.h"
 #include "vertexBuffer.h"
 #include "vertexBufferLayout.h"
@@ -56,10 +60,10 @@ int main(void)
     std::cout << glGetString(GL_VERSION) << std::endl;
     {
         std::vector<float> positions = {
-            100.0f, 100.0f, 0.0f, 0.0f,  // 0
-            200.0f, 100.0f, 1.0f, 0.0f,  // 1
-            200.0f, 200.0f, 1.0f, 1.0f,  // 2
-            100.0f, 200.0f, 0.0f, 1.0f,  // 3
+            0.0f,   0.0f,   0.0f, 0.0f,  // 0
+            100.0f, 0.0f,   1.0f, 0.0f,  // 1
+            100.0f, 100.0f, 1.0f, 1.0f,  // 2
+            0.0f,   100.0f, 0.0f, 1.0f,  // 3
         };
 
         std::vector<unsigned int> indices = {
@@ -74,11 +78,7 @@ int main(void)
         IndexBuffer ib(&indices[0], indices.size());
 
         glm::mat4 proj = glm::ortho(0.0f, 640.0f, 0.0f, 480.0f, -1.0f, 1.0f);
-        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(300, 0, 0));
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(-200, 200, 0));
-
-
-        glm::mat4 mvp =  proj * view * model;
+        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
 
         /* VertexArray is generated with default index 0 in compatibility profile but isn't in core profile
          * thus we must generate vertex array manually here
@@ -94,19 +94,51 @@ int main(void)
 
         Texture texture("res/textures/logo.png");
         shader.setUniform1i("u_Texture", 0);
-        shader.setUniformMat4f("u_MVP", mvp);
 
         Renderer renderer;
+
+        // IMGUI
+        const char* glsl_version = "#version 150";
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        ImGui::StyleColorsDark();
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui_ImplOpenGL3_Init(glsl_version);
+        // Our state
+        bool show_demo_window = true;
+        bool show_another_window = false;
+        ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+        glm::vec3 translation(0.0f, 0.0f, 0.0f);
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
         {
-            shader.bind();
-            texture.bind();
+            {
+                glm::mat4 model = glm::translate(glm::mat4(1.0f), translation);
+                glm::mat4 mvp =  proj * view * model;
+                shader.setUniformMat4f("u_MVP", mvp);
 
-            /* Render here */
-            renderer.clear();
-            renderer.draw(va, ib, shader);
+                shader.bind();
+                texture.bind();
+
+                renderer.clear();
+                renderer.draw(va, ib, shader);
+            }
+
+            {
+                ImGui_ImplOpenGL3_NewFrame();
+                ImGui_ImplGlfw_NewFrame();
+                ImGui::NewFrame();
+
+                ImGui::SliderFloat("x_offset", &translation.x, 0.0f, 640.0f);
+                ImGui::SliderFloat("y_offset", &translation.y, 0.0f, 480.0f);
+
+                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+
+                ImGui::Render();
+                ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            }
 
             /* Swap front and back buffers */
             glfwSwapBuffers(window);
@@ -115,6 +147,10 @@ int main(void)
             glfwPollEvents();
         }
     }
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     glfwTerminate();
     return 0;
