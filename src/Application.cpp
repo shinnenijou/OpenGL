@@ -60,10 +60,10 @@ int main(void)
     std::cout << glGetString(GL_VERSION) << std::endl;
     {
         std::vector<float> positions = {
-            0.0f,   0.0f,   0.0f, 0.0f,  // 0
-            100.0f, 0.0f,   1.0f, 0.0f,  // 1
-            100.0f, 100.0f, 1.0f, 1.0f,  // 2
-            0.0f,   100.0f, 0.0f, 1.0f,  // 3
+            -50.0f,   -50.0f, 0.0f, 0.0f,  // 0
+             50.0f,   -50.0f, 1.0f, 0.0f,  // 1
+             50.0f,    50.0f, 1.0f, 1.0f,  // 2
+            -50.0f,    50.0f, 0.0f, 1.0f,  // 3
         };
 
         std::vector<unsigned int> indices = {
@@ -109,20 +109,29 @@ int main(void)
         bool show_another_window = false;
         ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-        glm::vec3 translation(0.0f, 0.0f, 0.0f);
+        glm::vec3 translationA(200.0f, 0.0f, 0.0f);
+        glm::vec3 translationB(400.0f, 0.0f, 0.0f);
+
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
         {
             {
-                glm::mat4 model = glm::translate(glm::mat4(1.0f), translation);
-                glm::mat4 mvp =  proj * view * model;
-                shader.setUniformMat4f("u_MVP", mvp);
+                renderer.clear();
 
                 shader.bind();
                 texture.bind();
 
-                renderer.clear();
+                /* Object A */
+                glm::mat4 model = glm::translate(glm::mat4(1.0f), translationA);
+                glm::mat4 mvp =  proj * view * model;
+                shader.setUniformMat4f("u_MVP", mvp);
+                renderer.draw(va, ib, shader);
+
+                /* Object B */
+                model = glm::translate(glm::mat4(1.0f), translationB);
+                mvp =  proj * view * model;
+                shader.setUniformMat4f("u_MVP", mvp);
                 renderer.draw(va, ib, shader);
             }
 
@@ -131,8 +140,8 @@ int main(void)
                 ImGui_ImplGlfw_NewFrame();
                 ImGui::NewFrame();
 
-                ImGui::SliderFloat("x_offset", &translation.x, 0.0f, 640.0f);
-                ImGui::SliderFloat("y_offset", &translation.y, 0.0f, 480.0f);
+                ImGui::SliderFloat3("translationA", &translationA.x, 0.0f, 640.0f);
+                ImGui::SliderFloat3("translationB", &translationB.x, 0.0f, 640.0f);
 
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
 
